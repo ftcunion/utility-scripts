@@ -7,7 +7,7 @@ set -e
 selected_backup="${1:-"$(find '/root/backups' -maxdepth 1 -type f -name '*.xz' -print | sort -r | head -n1)"}"
 
 echo "About to restore \"$selected_backup\". Press ENTER to continue or Ctrl-C to escape."
-read -r useless_user_input
+read -r _
 
 # only restore if a backup was found
 if [ -n "$selected_backup" ]; then
