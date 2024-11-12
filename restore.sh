@@ -6,6 +6,9 @@ set -e
 # get the filename for selected file defaulting to the most recent backup (they are named with a timestamp)
 selected_backup="${1:-"$(find '/root/backups' -maxdepth 1 -type f -name '*.xz' -print | sort -r | head -n1)"}"
 
+echo "About to restore \"$selected_backup\". Press ENTER to continue or Ctrl-C to escape."
+read -r useless_user_input
+
 # only restore if a backup was found
 if [ -n "$selected_backup" ]; then
     # create a temporary file to hold the decompressed backup
