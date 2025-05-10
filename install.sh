@@ -9,7 +9,7 @@ USER="mwt"
 
 # install commands that I expect to use
 apt-get update
-apt-get install -y sudo git rsync ssl-cert curl byobu micro
+apt-get install -y sudo git rsync rclone ssl-cert curl byobu micro
 
 # create user mwt, set random password, add to sudo group, and add first line of root's .ssh/authorized_keys
 echo "Creating user $USER..." && {
