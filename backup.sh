@@ -15,4 +15,4 @@ find . -maxdepth 1 -type f -mtime +2 -exec rm {} \;
 find . -maxdepth 1 -type f ! -name '*.xz' -exec xz -z {} \;
 
 # upload to google drive
-rclone sync --transfers=8 --checkers=16 --drive-chunk-size=256M --retries=3 --low-level-retries=10 ./ gdrive:/website/backups/
+rclone copy --transfers=8 --checkers=16 --drive-chunk-size=256M --retries=3 --low-level-retries=10 ./ gdrive:/website/backups/
