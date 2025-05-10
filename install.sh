@@ -75,4 +75,30 @@ cd "/var/www/$DOMAIN/htdocs" && {
     else
         echo "Stewart Child Theme is already installed!"
     fi
+
+    # install wp-cli
+    if [ ! -d /usr/local/bin/wp ]; then
+        wget --timeout=15 -t 1 -qrO /tmp/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+        chmod 755 /tmp/wp
+        mv /tmp/wp /usr/local/bin/wp
+        echo ""
+        echo "WP-CLI has been installed!"
+    else
+        echo "WP-CLI is already installed!"
+    fi
+
+    echo "using wp-cli to remove default plugins..."
+    sudo -u www-data wp plugin uninstall \
+        --path="/var/www/$DOMAIN/htdocs" \
+        --deactivate \
+        --all
+
+    echo "using wp-cli to install plugins..."
+    sudo -u www-data wp plugin install \
+        --path="/var/www/$DOMAIN/htdocs" \
+        --activate \
+        'redis-cache' \
+        'autoptimize' \
+        'autodescription', \
+        'svg-favicon'
 }
