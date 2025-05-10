@@ -36,8 +36,6 @@ sed -i -E 's;^#(php-disable-functions:.*,)(diskfreespace,disk_free_space,)(.*)$;
 stack -lemp -build=light
 # install redis
 stack -redis
-# install backups
-stack -backups
 
 # set up basic wordpress site
 site "$DOMAIN" -wp -force-redirect=www
