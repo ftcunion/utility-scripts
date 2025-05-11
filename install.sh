@@ -7,47 +7,58 @@ set -e
 DOMAIN="ftcunion.org"
 USER="mwt"
 
-# install commands that I expect to use
-apt-get update
-apt-get install -y sudo git rsync rclone ssl-cert curl byobu micro
+# only run commands if the .installed file does not exist
+if [ ! -f /root/.winstalled ]; then
 
-# create user mwt, set random password, add to sudo group, and add first line of root's .ssh/authorized_keys
-echo "Creating user $USER..." && {
-    useradd -m -s /bin/bash "$USER"
-    echo "$USER:$(openssl rand -base64 12)" | chpasswd
-    usermod -aG 'sudo' "$USER"
-    mkdir -p "/home/$USER/.ssh"
-    head -n 1 "/root/.ssh/authorized_keys" >"/home/$USER/.ssh/authorized_keys"
-    chmod 700 "/home/$USER/.ssh"
-    chmod 600 "/home/$USER/.ssh/authorized_keys"
-    chown -R "$USER:$USER" "/home/$USER/.ssh"
-}
+    # install commands that I expect to use
+    apt-get update
+    apt-get install -y sudo git rsync rclone ssl-cert curl byobu micro
 
-# webinoly clean installation
-wget -qO weby qrok.es/wy && bash weby -clean
+    # create user mwt, set random password, add to sudo group, and add first line of root's .ssh/authorized_keys
+    echo "Creating user $USER..." && {
+        useradd -m -s /bin/bash "$USER"
+        echo "$USER:$(openssl rand -base64 12)" | chpasswd
+        usermod -aG 'sudo' "$USER"
+        mkdir -p "/home/$USER/.ssh"
+        head -n 1 "/root/.ssh/authorized_keys" >"/home/$USER/.ssh/authorized_keys"
+        chmod 700 "/home/$USER/.ssh"
+        chmod 600 "/home/$USER/.ssh/authorized_keys"
+        chown -R "$USER:$USER" "/home/$USER/.ssh"
+    }
 
-# patch webinoly config to allow remaining storage commands
-sed -i -E 's;^#(php-disable-functions:.*,)(diskfreespace,disk_free_space,)(.*)$;#\1\2\3\n\1\3;' '/opt/webinoly/webinoly.conf'
+    # webinoly clean installation
+    wget -qO weby qrok.es/wy && bash weby -clean
 
-# now build the stacksite "$DOMAIN" -wp
-# here we're using the 'light' option to not install additional tools (only core packages)
-# let's encrypt, backups, postfix, redis, memcached, phpmyadmin, etc, will not be installed.
-# also, you can use the 'basic' option, or install individual tools according to your needs.
-stack -lemp -build=light
-# install redis
-stack -redis
+    # patch webinoly config to allow remaining storage commands
+    sed -i -E 's;^#(php-disable-functions:.*,)(diskfreespace,disk_free_space,)(.*)$;#\1\2\3\n\1\3;' '/opt/webinoly/webinoly.conf'
 
-# set up basic wordpress site
-site "$DOMAIN" -wp -force-redirect=www
+    # now build the stacksite "$DOMAIN" -wp
+    # here we're using the 'light' option to not install additional tools (only core packages)
+    # let's encrypt, backups, postfix, redis, memcached, phpmyadmin, etc, will not be installed.
+    # also, you can use the 'basic' option, or install individual tools according to your needs.
+    stack -lemp -build=light
+    # install redis
+    stack -redis
 
-# enable ssl with self-signed certificate
-site "$DOMAIN" -ssl=on -ssl-key=/etc/ssl/private/ssl-cert-snakeoil.key -ssl-crt=/etc/ssl/certs/ssl-cert-snakeoil.pem
+    # set up basic wordpress site
+    site "$DOMAIN" -wp -force-redirect=www
 
-# disable http authentication for wp-admin
-httpauth "$DOMAIN" -wp-admin=off
+    # enable ssl with self-signed certificate
+    site "$DOMAIN" -ssl=on -ssl-key=/etc/ssl/private/ssl-cert-snakeoil.key -ssl-crt=/etc/ssl/certs/ssl-cert-snakeoil.pem
 
-# install custom theme
-cd "/var/www/$DOMAIN/htdocs" && {
+    # disable http authentication for wp-admin
+    httpauth "$DOMAIN" -wp-admin=off
+
+    # create .winstalled file
+    touch /root/.winstalled
+    echo "Success! configure WordPress and run this script again to install plugins and themes."
+
+# if the .installed file exists, then we can run the rest of the script
+else
+
+    # install custom themes and plugins
+    cd "/var/www/$DOMAIN/htdocs"
+
     # install stewart base theme
     if [ ! -d ./wp-content/themes/stewart ]; then
         # download stewart theme
@@ -101,4 +112,6 @@ cd "/var/www/$DOMAIN/htdocs" && {
         'autoptimize' \
         'autodescription', \
         'svg-favicon'
-}
+
+    cd -
+fi
