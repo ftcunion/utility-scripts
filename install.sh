@@ -49,6 +49,22 @@ if [ ! -f /root/.winstalled ]; then
     # disable http authentication for wp-admin
     httpauth "$DOMAIN" -wp-admin=off
 
+    # patch redis to enable socket connections
+    sed -i \
+        -E 's;^# unixsocket .*$;unixsocket /run/redis/redis.sock;' \
+        -E 's;^# unixsocketperm .*$;unixsocketperm 770;' \
+        '/etc/redis/redis.conf'
+
+    # add www-data to redis group
+    usermod -aG redis www-data
+
+    # restart redis
+    systemctl restart redis
+
+    # ufw allow https and limit ssh
+    ufw allow https
+    ufw limit ssh
+
     # create .winstalled file
     touch /root/.winstalled
     echo "Success! configure WordPress and run this script again to install plugins and themes."
