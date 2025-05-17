@@ -41,7 +41,7 @@ if [ ! -f /root/.winstalled ]; then
     stack -redis
 
     # set up basic wordpress site
-    site "$DOMAIN" -wp -force-redirect=www
+    site "$DOMAIN" -wp -cache=on -force-redirect=www
 
     # enable ssl with self-signed certificate
     site "$DOMAIN" -ssl=on -ssl-key=/etc/ssl/private/ssl-cert-snakeoil.key -ssl-crt=/etc/ssl/certs/ssl-cert-snakeoil.pem
@@ -124,7 +124,6 @@ else
     sudo -u www-data wp plugin install \
         --path="/var/www/$DOMAIN/htdocs" \
         --activate \
-        'redis-cache' \
         'autoptimize' \
         'autodescription', \
         'svg-favicon'
