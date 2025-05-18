@@ -127,7 +127,7 @@ else
     sudo -u www-data wp plugin install \
         --path="/var/www/$DOMAIN/htdocs" \
         --activate \
-        'autoptimize' \
+        'cloudflare' \
         'autodescription', \
         'svg-favicon'
 
