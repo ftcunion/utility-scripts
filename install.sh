@@ -29,8 +29,11 @@ if [ ! -f /root/.winstalled ]; then
     # webinoly clean installation
     wget -qO weby qrok.es/wy && bash weby -clean
 
-    # patch webinoly config to allow remaining storage commands
-    sed -i -E 's;^#(php-disable-functions:.*,)(diskfreespace,disk_free_space,)(.*)$;#\1\2\3\n\1\3;' '/opt/webinoly/webinoly.conf'
+    # patch webinoly config to allow remaining storage commands and increase max upload size
+    sed -i \
+        -E 's;^#(php-disable-functions:.*,)(diskfreespace,disk_free_space,)(.*)$;#\1\2\3\n\1\3;' \
+        -E 's;^(#max-mb-uploads:.+)$;\1\nmax-mb-uploads:200;' \
+        '/opt/webinoly/webinoly.conf'
 
     # now build the stacksite "$DOMAIN" -wp
     # here we're using the 'light' option to not install additional tools (only core packages)
