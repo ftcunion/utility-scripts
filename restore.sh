@@ -11,12 +11,12 @@ read -r _
 
 # only restore if a backup was found
 if [ -n "$selected_backup" ]; then
-    # create a temporary file to hold the decompressed backup
-    temp_file=$(mktemp -p /tmp/ -t webinoly_backup.XXXXXX)
-    # decompress the backup
-    xz -dc "$selected_backup" >"$temp_file"
-    # restore the webinoly configuration
-    webinoly -backup=local -import=full -file="$temp_file"
-    # remove the temporary file
-    rm "$temp_file"
+	# create a temporary file to hold the decompressed backup
+	temp_file=$(mktemp -p /tmp/ -t webinoly_backup.XXXXXX)
+	# decompress the backup
+	xz -dc "$selected_backup" >"$temp_file"
+	# restore the webinoly configuration
+	webinoly -backup=local -import=full -file="$temp_file"
+	# remove the temporary file
+	rm "$temp_file"
 fi
