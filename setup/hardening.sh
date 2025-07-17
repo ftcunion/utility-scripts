@@ -24,7 +24,7 @@ done
 
 # Enable Cloudflare Authenticated Origin Pulls if files do not exist.
 if [ ! -f "/var/www/$DOMAIN/cloudflare-mtls-nginx.conf" ] || [ ! -f "/var/www/$DOMAIN/.cloudflare-mtls.crt" ]; then
-	echo "Downloading Cloudflare Authenticated Origin Pulls certificate and key for domain: $DOMAIN"
+	echo "Copying Cloudflare Authenticated Origin Pulls config and certificate for $DOMAIN"
 	# Nginx config gets read if it ends with -nginx.conf
 	cat <<-EOF >/var/www/$DOMAIN/cloudflare-mtls-nginx.conf
 		ssl_verify_client on;
@@ -81,7 +81,7 @@ if [ ! -f "/var/www/$DOMAIN/cloudflare-mtls-nginx.conf" ] || [ ! -f "/var/www/$D
 		exit 1
 	fi
 else
-	echo "Cloudflare mTLS certificate and key already exist for $DOMAIN. Skipping..."
+	echo "Cloudflare mTLS already configured for $DOMAIN. Skipping..."
 fi
 
 # Setting up UWF (Uncomplicated Firewall)
@@ -97,6 +97,10 @@ if ufw status | grep -qw "Status: inactive"; then
 	ufw allow https
 	ufw limit ssh
 	echo "You should run 'ufw enable' to apply these changes."
-else
+elif ufw status | grep -qw "Status: active"; then
 	echo "UFW is already active. Skipping..."
+else
+	echo "UFW error. Expected either 'Status: inactive' or 'Status: active', but got:"
+	ufw status
+	exit 1
 fi
