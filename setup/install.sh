@@ -29,6 +29,11 @@ if [ ! -f /root/.winstalled ]; then
 	# webinoly clean installation
 	wget -qO weby qrok.es/wy && bash weby -clean
 
+	# pre-installation config
+	sudo webinoly -timezone=America/New_York
+	sudo stack -php-ver=8.4
+  	sudo stack -mysql-ver=11.8
+
 	# patch webinoly config to allow remaining storage commands and increase max upload size
 	sed -i \
 		-E 's;^#(php-disable-functions:.*,)(diskfreespace,disk_free_space,)(.*)$;#\1\2\3\n\1\3;' \
