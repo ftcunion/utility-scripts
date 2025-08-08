@@ -23,15 +23,16 @@ curl -s https://www.cloudflare.com/ips-v4 | while read -r ip; do
 done
 
 # Enable Cloudflare Authenticated Origin Pulls if files do not exist.
-if [ ! -f "/var/www/$DOMAIN/cloudflare-mtls-nginx.conf" ] || [ ! -f "/var/www/$DOMAIN/.cloudflare-mtls.crt" ]; then
+if [ ! -f "/var/www/$DOMAIN/cloudflare-mtls-nginx.conf" ] || [ ! -f "/etc/nginx/certs/cloudflare-mtls.pem" ]; then
 	echo "Copying Cloudflare Authenticated Origin Pulls config and certificate for $DOMAIN"
 	# Nginx config gets read if it ends with -nginx.conf
 	cat <<-EOF >/var/www/$DOMAIN/cloudflare-mtls-nginx.conf
 		ssl_verify_client on;
-		ssl_client_certificate /var/www/$DOMAIN/.cloudflare-mtls.crt;
+		ssl_client_certificate /etc/nginx/certs/cloudflare-mtls.pem;
 	EOF
 	# Copy the *public* certificate that will be used to verify Cloudflare's mTLS connections
-	cat <<-EOF >/var/www/$DOMAIN/.cloudflare-mtls.crt
+	mkdir -p /etc/nginx/certs
+	cat <<-EOF >/etc/nginx/certs/cloudflare-mtls.pem
 		-----BEGIN CERTIFICATE-----
 		MIIGLTCCBBWgAwIBAgIUGvzZVwp8p3GI8/fZNJdNX5adSEwwDQYJKoZIhvcNAQEL
 		BQAwgaQxCzAJBgNVBAYTAlVTMR0wGwYDVQQIDBREaXN0cmljdCBvZiBDb2x1bWJp
@@ -71,7 +72,7 @@ if [ ! -f "/var/www/$DOMAIN/cloudflare-mtls-nginx.conf" ] || [ ! -f "/var/www/$D
 	EOF
 
 	chmod 600 /var/www/$DOMAIN/cloudflare-mtls-nginx.conf
-	chmod 400 /var/www/$DOMAIN/.cloudflare-mtls.crt
+	chmod 400 /etc/nginx/certs/cloudflare-mtls.pem
 
 	if nginx -t; then
 		echo "Nginx configuration test passed. Reloading Nginx..."
