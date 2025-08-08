@@ -30,9 +30,9 @@ if [ ! -f /root/.winstalled ]; then
 	wget -qO weby qrok.es/wy && bash weby -clean
 
 	# pre-installation config
-	sudo webinoly -timezone=America/New_York
-	sudo stack -php-ver=8.4
-  	sudo stack -mysql-ver=11.8
+	webinoly -timezone=America/New_York
+	stack -php-ver=8.4
+	stack -mysql-ver=11.8
 
 	# patch webinoly config to allow remaining storage commands and increase max upload size
 	sed -i \
@@ -73,11 +73,22 @@ if [ ! -f /root/.winstalled ]; then
 	ufw allow https
 	ufw limit ssh
 
+	# install wp-cli
+	if [ ! -d /usr/local/bin/wp ]; then
+		wget --timeout=15 -t 1 -qrO /tmp/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+		chmod 755 /tmp/wp
+		mv /tmp/wp /usr/local/bin/wp
+		echo ""
+		echo "WP-CLI has been installed!"
+	else
+		echo "WP-CLI is already installed!"
+	fi
+
 	# create .winstalled file
 	touch /root/.winstalled
 	echo "Success! configure WordPress and run this script again to install plugins and themes."
 
-# if the .installed file exists, then we can run the rest of the script
+# if the .installed file exists, then we can run the rest of the script, with all commands run by www-data
 else
 
 	# install custom themes and plugins
@@ -86,10 +97,10 @@ else
 	# install stewart base theme
 	if [ ! -d ./wp-content/themes/stewart ]; then
 		# download stewart theme
-		wget --timeout=15 -t 1 -qrO ./stewart-theme.zip 'https://downloads.wordpress.org/theme/stewart.latest-stable.zip'
+		sudo -u www-data wget --timeout=15 -t 1 -qrO ./stewart-theme.zip 'https://downloads.wordpress.org/theme/stewart.latest-stable.zip'
 		if [ -s ./stewart-theme.zip ]; then
-			unzip -qq ./stewart-theme.zip -d ./wp-content/themes/
-			rm ./stewart-theme.zip
+			sudo -u www-data unzip -qq ./stewart-theme.zip -d ./wp-content/themes/
+			sudo -u www-data rm ./stewart-theme.zip
 			echo ""
 			echo "Stewart Theme has been installed!"
 		else
@@ -100,7 +111,7 @@ else
 	fi
 	# install stewart child theme
 	if [ ! -d ./wp-content/themes/ftcunion-stewart ]; then
-		git clone 'https://github.com/ftcunion/ftcunion-stewart.git' ./wp-content/themes/ftcunion-stewart
+		sudo -u www-data git clone 'https://github.com/ftcunion/ftcunion-stewart.git' ./wp-content/themes/ftcunion-stewart
 		if [ -d ./wp-content/themes/ftcunion-stewart ]; then
 			echo ""
 			echo "Stewart Child Theme has been installed!"
@@ -109,17 +120,6 @@ else
 		fi
 	else
 		echo "Stewart Child Theme is already installed!"
-	fi
-
-	# install wp-cli
-	if [ ! -d /usr/local/bin/wp ]; then
-		wget --timeout=15 -t 1 -qrO /tmp/wp https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-		chmod 755 /tmp/wp
-		mv /tmp/wp /usr/local/bin/wp
-		echo ""
-		echo "WP-CLI has been installed!"
-	else
-		echo "WP-CLI is already installed!"
 	fi
 
 	echo "using wp-cli to remove default plugins..."
