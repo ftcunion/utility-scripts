@@ -21,6 +21,39 @@ if [ ! -f /root/.lsinstalled ]; then
 		site "$DOMAIN" -ssl=on -ssl-key=/etc/ssl/private/ssl-cert-snakeoil.key -ssl-crt=/etc/ssl/certs/ssl-cert-snakeoil.pem
 	fi
 
+	cat <<-'EOF' >"/var/www/$DOMAIN/lime-survey.conf"
+		# Disallow reading inside php script directory, see issue with debug > 1 on note
+		location ~ ^/(application|docs|framework|locale|protected|tests|themes/\w+/views) {
+		    deny all;
+		}
+
+		# Disallow reading inside runtime directory
+		location ~ ^/tmp/runtime/ {
+		    deny all;
+		}
+
+		# Allow access to well-known directory, different usage, for example ACME Challenge for Let's Encrypt
+		location ~ /\.well-known {
+		    allow all;
+		}
+
+		# Deny all attempts to access hidden files
+		# such as .htaccess, .htpasswd, .DS_Store (Mac).
+		location ~ /\. {
+		    deny all;
+		}
+
+		#Disallow direct read user upload files
+		location ~ ^/upload/surveys/.*/fu_[a-z0-9]*$ {
+		    return 444;
+		}
+
+		#Disallow uploaded potential executable files in upload directory
+		location ~* /upload/.*\.(pl|cgi|py|pyc|pyo|phtml|sh|lua|php|php3|php4|php5|php6|pcgi|pcgi3|pcgi4|pcgi5|pcgi6|icn)$ {
+		    return 444;
+		}
+	EOF
+
 	echo "Copy the database password and rerun this script to install or update LimeSurvey."
 
 	# create the .lsinstalled file to indicate installation is complete
