@@ -43,12 +43,12 @@ if [ ! -f /root/.lsinstalled ]; then
 		    deny all;
 		}
 
-		#Disallow direct read user upload files
+		# Disallow direct read user upload files
 		location ~ ^/upload/surveys/.*/fu_[a-z0-9]*$ {
 		    return 444;
 		}
 
-		#Disallow uploaded potential executable files in upload directory
+		# Disallow uploaded potential executable files in upload directory
 		location ~* /upload/.*\.(pl|cgi|py|pyc|pyo|phtml|sh|lua|php|php3|php4|php5|php6|pcgi|pcgi3|pcgi4|pcgi5|pcgi6|icn)$ {
 		    return 444;
 		}
@@ -80,7 +80,7 @@ else
 	sudo -u www-data wget -O "$TEMP_FILE" "${CUSTOM_URL:-$DERIVED_UPDATE_URL}"
 
 	# extract the downloaded zip file into the temporary directory
-	sudo -u www-data unzip -o "$TEMP_FILE" -d "$TEMP_DIR"
+	sudo -u www-data unzip -q -o "$TEMP_FILE" -d "$TEMP_DIR"
 
 	# determine whether this is an initial install or an update
 	if [ -f "./htdocs/index.php" ]; then
@@ -96,12 +96,11 @@ else
 		#   - the upload directory
 		echo "Syncing new files to $DEST_DIR..."
 		# there should only be one directory in the temp dir, but it apparently changes sometimes
-		for src in "$TEMP_DIR"/*/; do
-			sudo -u www-data rsync -av --exclude='application/config/security.php' \
-				--exclude='application/config/config.php' \
-				--exclude='upload' \
-				"$src/" "./htdocs/"
-		done
+		sudo -u www-data find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -exec rsync -av --delete \
+			--exclude='application/config/security.php' \
+			--exclude='application/config/config.php' \
+			--exclude='upload' \
+			"{}/" "./htdocs/" \; -quit
 
 		# Update the database schema using LimeSurvey's console command.
 		echo "Updating the database..."
@@ -110,10 +109,7 @@ else
 		echo "Installing LimeSurvey..."
 		# perform installation steps
 		# there should only be one directory in the temp dir, but it apparently changes sometimes
-		for src in "$TEMP_DIR"/*/; do
-			sudo -u www-data rsync -a "$src/" "./htdocs/"
-			break
-		done
+		sudo -u www-data find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -exec rsync -av --delete "{}/" "./htdocs/" \; -quit
 	fi
 
 	# clean up temporary files
