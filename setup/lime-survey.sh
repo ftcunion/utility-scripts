@@ -86,8 +86,8 @@ else
 	if [ -f "./htdocs/index.php" ]; then
 		echo "Updating LimeSurvey..."
 
-		# perform backup
-		"$GIT_DIR/backup.sh"
+		# perform backup without uploading to Google Drive
+		"$GIT_DIR/backup.sh" -n
 
 		# Sync new version files to the destination.
 		# Excludes:
@@ -96,7 +96,7 @@ else
 		#   - the upload directory
 		echo "Syncing new files to $DEST_DIR..."
 		# there should only be one directory in the temp dir, but it apparently changes sometimes
-		sudo -u www-data find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -exec rsync -av --delete \
+		sudo -u www-data find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -exec rsync -a --stats --delete \
 			--exclude='application/config/security.php' \
 			--exclude='application/config/config.php' \
 			--exclude='upload' \
@@ -109,7 +109,7 @@ else
 		echo "Installing LimeSurvey..."
 		# perform installation steps
 		# there should only be one directory in the temp dir, but it apparently changes sometimes
-		sudo -u www-data find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -exec rsync -av --delete "{}/" "./htdocs/" \; -quit
+		sudo -u www-data find "$TEMP_DIR" -mindepth 1 -maxdepth 1 -type d -exec rsync -a --stats --delete "{}/" "./htdocs/" \; -quit
 	fi
 
 	# clean up temporary files
