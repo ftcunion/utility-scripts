@@ -20,11 +20,11 @@ while getopts 'n' opt; do
         echo "Skipping upload to Google Drive"
         exit 0
         ;;
-    *)
-        # apply xz to compress all uncompressed backups
-        find . -maxdepth 1 -type f ! -name '*.xz' -exec xz -z {} \;
-        # upload to google drive
-        rclone copy --transfers=8 --checkers=16 --drive-chunk-size=256M --retries=3 --low-level-retries=10 ./ gdrive:/website/backups/
-        ;;
+    *) echo "Invalid option: ${opt}" ;;
     esac
 done
+
+# apply xz to compress all uncompressed backups
+find . -maxdepth 1 -type f ! -name '*.xz' -exec xz -z {} \;
+# upload to google drive
+rclone copy --transfers=8 --checkers=16 --drive-chunk-size=256M --retries=3 --low-level-retries=10 ./ gdrive:/website/backups/
