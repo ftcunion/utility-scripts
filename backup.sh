@@ -18,7 +18,7 @@ if [ ! -d "$current_month" ]; then
     # create current month directory
     mkdir "$current_month"
     # init zbackup for current month
-    zbackup init "$current_month" --non-encrypted
+    zbackup init --non-encrypted "$current_month"
 fi
 
 # backup the webinoly configuration
