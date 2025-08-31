@@ -12,6 +12,9 @@ restore_tar_archive() {
 	zbackup_path="$1"
 	output_path="/root/backups/$(basename "$zbackup_path")"
 
+	# if /root/backups does not exist, create it
+	[ ! -d "/root/backups" ] && mkdir -p "/root/backups"
+
 	# restore the tar archive using zbackup
 	zbackup restore --non-encrypted "$zbackup_path" >"$output_path"
 	echo "$output_path"
