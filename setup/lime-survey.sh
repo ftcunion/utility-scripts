@@ -86,8 +86,8 @@ else
 	if [ -f "./htdocs/index.php" ]; then
 		echo "Updating LimeSurvey..."
 
-		# perform backup without uploading to Google Drive
-		"$GIT_DIR/backup.sh" -n
+		# perform backup without uploading to Backblaze
+		"$GIT_DIR/backup/webinoly-backup.sh" -n
 
 		# Sync new version files to the destination.
 		# Excludes:
