@@ -28,7 +28,7 @@ elif [ -n "$1" ]; then
 else
 	# try to guess!
 	# find the most recent month, (though having more than one month is an edge case)
-	most_recent_month="$(find '/root/backups/webinoly' -maxdepth 1 -mindepth 1 -type d ! -name '.*' -print0 | sort -rz | head -z --lines=1 | tr -d '\0')"
+	most_recent_month="$(find '/root/backups/webinoly/zbackup' -maxdepth 1 -mindepth 1 -type d ! -name '.*' -print0 | sort -rz | head -z --lines=1 | tr -d '\0')"
 
 	# if most recent month is empty and no backup is specified, exit
 	if [ -z "$most_recent_month" ]; then
